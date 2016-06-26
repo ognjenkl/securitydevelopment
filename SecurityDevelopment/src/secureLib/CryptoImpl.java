@@ -809,6 +809,30 @@ public class CryptoImpl {
 	}
 	
 	/**
+	 * Imports Key.
+	 * 
+	 * @param keyPath
+	 * @return
+	 * @throws IOException
+	 */
+	public static PublicKey getPublicKey(File filePublicKey) throws IOException{
+		PublicKey pubKey = null;
+		if(filePublicKey.exists()){
+			BufferedReader bufferedReader = new BufferedReader(new FileReader(filePublicKey));
+			PEMParser pemParser = new PEMParser(bufferedReader);
+			//PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
+			SubjectPublicKeyInfo pubInfo = SubjectPublicKeyInfo.getInstance(pemParser.readObject());
+			//keyPair = new JcaPEMKeyConverter().getKeyPair(pemKeyPair);
+			pubKey = new JcaPEMKeyConverter().getPublicKey(pubInfo);
+			pemParser.close();
+		}
+		else
+			System.out.println("There is no Key on path");
+		
+		return pubKey;
+	}
+	
+	/**
 	 * Ne radi
 	 * Imports Key with password protection.
 	 * 
