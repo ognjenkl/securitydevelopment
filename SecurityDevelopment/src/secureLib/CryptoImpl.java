@@ -767,6 +767,28 @@ public class CryptoImpl {
 	 * @return
 	 * @throws IOException
 	 */
+	public static KeyPair getKeyPair(File filePrivateKey) throws IOException{
+		KeyPair keyPair = null;
+		if(filePrivateKey.exists()){
+			BufferedReader bufferedReader = new BufferedReader(new FileReader(filePrivateKey));
+			PEMParser pemParser = new PEMParser(bufferedReader);
+			PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
+			keyPair = new JcaPEMKeyConverter().getKeyPair(pemKeyPair);
+			pemParser.close();
+		}
+		else
+			System.out.println("There is no Key on path");
+		
+		return keyPair;
+	}
+	
+	/**
+	 * Imports Key.
+	 * 
+	 * @param keyPath
+	 * @return
+	 * @throws IOException
+	 */
 	public static PublicKey getPublicKey(String keyPath) throws IOException{
 		File filePrivateKey = new File(keyPath);
 		KeyPair keyPair = null;

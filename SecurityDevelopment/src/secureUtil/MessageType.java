@@ -10,5 +10,6 @@ public class MessageType {
 	public static final String ALGORITHM = "algorithm";
 	public static final String OK = "ok";
 	public static final String SERVER = "server";
+	public static final String PUBLICKEY = "publickey";
 
 }
