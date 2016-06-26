@@ -69,6 +69,8 @@ import org.bouncycastle.operator.DigestAlgorithmIdentifierFinder;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 
+import secureUtil.MessageType;
+
 public class CryptoImpl {
 	
 	public static String asHex (byte buf[]) 
@@ -835,8 +837,35 @@ public class CryptoImpl {
 		return pubKey;
 	}
 	
-	public static PublicKey deserializeRsaPublicKey(String keyString){
+	/**
+	 * Imports Key.
+	 * 
+	 * @param keyPath
+	 * @return
+	 * @throws IOException
+	 */
+	public static synchronized String getPublicKeyAsBase64EncodedString(File filePublicKey) throws IOException{
+		String pubKeyString = "";
+		PublicKey pubKey = null;
+		if(filePublicKey.exists()){
+			BufferedReader bufferedReader = new BufferedReader(new FileReader(filePublicKey));
+			PEMParser pemParser = new PEMParser(bufferedReader);
+			//PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
+			SubjectPublicKeyInfo pubInfo = SubjectPublicKeyInfo.getInstance(pemParser.readObject());
+			//keyPair = new JcaPEMKeyConverter().getKeyPair(pemKeyPair);
+			pubKey = new JcaPEMKeyConverter().getPublicKey(pubInfo);
+			pemParser.close();
+			
+			byte[] pubKeyBase64Encoded = Base64.getEncoder().encode(pubKey.getEncoded());
+			pubKeyString = new String(pubKeyBase64Encoded, StandardCharsets.UTF_8);
+		}
+		else
+			System.out.println("There is no Key on path");
 		
+		return pubKeyString;
+	}
+	
+	public static PublicKey deserializeRsaPublicKey(String keyString){
 		PublicKey publicKey = null;
 		try {
 			byte[] pubKeyDecodedBase64 = Base64.getDecoder().decode(keyString.getBytes(StandardCharsets.UTF_8));
@@ -853,7 +882,6 @@ public class CryptoImpl {
 	}
 	
 public static PublicKey deserializeRsaPublicKey(byte[] key){
-		
 		PublicKey publicKey = null;
 		try {
 			publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(key));
@@ -1003,9 +1031,9 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 		
 		Digest digest = null; 
 		
-		if(digestAlgorithm.equals(new SHA256Digest().getAlgorithmName()))
+		if(digestAlgorithm.equals(MessageType.SHA256))
 			digest = new SHA256Digest();
-		else if (digestAlgorithm.equals(new SHA512Digest().getAlgorithmName())) 
+		else if (digestAlgorithm.equals(MessageType.SHA512)) 
 			digest = new SHA512Digest();
 		else
 			return null;
