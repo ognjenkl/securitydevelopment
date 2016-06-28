@@ -65,9 +65,10 @@ import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
-import org.bouncycastle.operator.DigestAlgorithmIdentifierFinder;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import secureUtil.MessageType;
 
@@ -838,7 +839,9 @@ public class CryptoImpl {
 	}
 	
 	/**
-	 * Imports Key.
+	 * Imports Public Key out from File on some location and converts it to String (encodes key default format x509,
+	 * Base64 encoded bytes and converted to UTF_8 string).
+	 * Oposite to deserializeRsaPublicKey().
 	 * 
 	 * @param keyPath
 	 * @return
@@ -865,6 +868,14 @@ public class CryptoImpl {
 		return pubKeyString;
 	}
 	
+	/**
+	 * Creates PublicKey objece out of public key string (get bytes out of UTF_8 string, Base64 decode 
+	 * and converts decoded bytes into RSA public key).
+	 * Oposite to getPublicKeyAsBase64EncodedString().
+	 * 
+	 * @param keyString
+	 * @return
+	 */
 	public static PublicKey deserializeRsaPublicKey(String keyString){
 		PublicKey publicKey = null;
 		try {
@@ -1044,6 +1055,51 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 
 		return digestBytes;
 		
+	}
+	
+	public static synchronized boolean verifyDigitalSignature(String cipher, String envelope, String digitalSignature, PublicKey publicKey, String opModeAsymmetric, KeyPair privateKeyPair){
+		boolean result = false;
+		System.out.println("temp cipher: " + cipher);
+		System.out.println("temp envelope: " + envelope);
+		System.out.println("temp digitalsignature: " + digitalSignature);
+		
+		try {
+
+			byte[] envelopeDecoded = Base64.getDecoder().decode(envelope.getBytes(StandardCharsets.UTF_8));
+			byte[] envelopeDecrypted = asymmetricEncryptDecrypt(opModeAsymmetric, privateKeyPair.getPrivate(), envelopeDecoded, false);
+			String envelopeDecryptedString = new String(Base64.getDecoder().decode(envelopeDecrypted), StandardCharsets.UTF_8);
+			System.out.println("temp envelope decrypted: " + envelopeDecryptedString);
+			
+		
+			JSONObject jsonEnvoelope = new JSONObject(envelopeDecryptedString);
+			String opModeSymmetric = jsonEnvoelope.getString(MessageType.ALGORITHM);
+			byte[] symmetricKey = Base64.getDecoder().decode(jsonEnvoelope.getString(MessageType.KEY).getBytes(StandardCharsets.UTF_8));
+			String hashFunction = jsonEnvoelope.getString(MessageType.HASH);
+			
+			System.out.println("temp opModeSymmetric: " + opModeSymmetric);
+			System.out.println("temp symmetricKey: " + symmetricKey);
+			System.out.println("temp hashFunction: " + hashFunction);
+			
+			byte[] cipherDecoded = Base64.getDecoder().decode(cipher.getBytes(StandardCharsets.UTF_8));
+			byte[] cipherDecrypted = symmetricEncryptDecrypt(opModeSymmetric, symmetricKey, cipherDecoded, false);
+			byte[] cipherDecryptedDecoded = Base64.getDecoder().decode(cipherDecrypted);
+			
+			byte[] cipherDecryptedDigest = hash(hashFunction, cipherDecryptedDecoded);
+			System.out.println("temp cipherDecryptedDigest: " + new String(cipherDecryptedDigest, StandardCharsets.UTF_8));
+			
+			byte[] digitalSignatureDecoded = Base64.getDecoder().decode(digitalSignature.getBytes(StandardCharsets.UTF_8));
+			byte[] digitalSignatureDecrypted = asymmetricEncryptDecrypt(opModeAsymmetric, publicKey, digitalSignatureDecoded, false);
+			System.out.println("temp digitalSignatureDecrypted: " + new String(digitalSignatureDecrypted, StandardCharsets.UTF_8));
+			
+			return Arrays.areEqual(cipherDecryptedDigest, digitalSignatureDecrypted);
+			
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		return result;
 	}
 	
 }
