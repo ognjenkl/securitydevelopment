@@ -1020,20 +1020,9 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 		
 		
 		System.out.println("pwd: " + System.getProperty("user.dir") + keyPath);
-//		KeyPair keyPair = null;
-//		if(filePrivateKey.exists()){
-//			BufferedReader bufferedReader = new BufferedReader(new FileReader(filePrivateKey));
-//			PEMParser pemParser = new PEMParser(bufferedReader);
-//			PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
-//			keyPair = new JcaPEMKeyConverter().getKeyPair(pemKeyPair);
-//			pemParser.close();
-//		}
-//		else
-//			System.out.println("There is no Key on path: " + keyPath );
 		
 		PublicKey pubKey = keyFac.generatePublic(pkcs8KeySpec);
 		return pubKey;
-//		return keyPair;
 	}
 	
 	public static byte[] hash(String digestAlgorithm, byte[] message){
@@ -1060,9 +1049,6 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 	
 	public static synchronized boolean verifyDigitalSignature(String cipher, String envelope, String digitalSignature, PublicKey publicKey, String opModeAsymmetric, KeyPair privateKeyPair){
 		boolean result = false;
-//		System.out.println("temp cipher: " + cipher);
-//		System.out.println("temp envelope: " + envelope);
-//		System.out.println("temp digitalsignature: " + digitalSignature);
 		
 		try {
 
@@ -1076,10 +1062,6 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 			String opModeSymmetric = jsonEnvoelope.getString(MessageType.ALGORITHM);
 			byte[] symmetricKey = Base64.getDecoder().decode(jsonEnvoelope.getString(MessageType.KEY).getBytes(StandardCharsets.UTF_8));
 			String hashFunction = jsonEnvoelope.getString(MessageType.HASH);
-			
-//			System.out.println("temp opModeSymmetric: " + opModeSymmetric);
-//			System.out.println("temp symmetricKey: " + symmetricKey);
-//			System.out.println("temp hashFunction: " + hashFunction);
 			
 			byte[] cipherDecoded = Base64.getDecoder().decode(cipher.getBytes(StandardCharsets.UTF_8));
 			byte[] cipherDecrypted = symmetricEncryptDecrypt(opModeSymmetric, symmetricKey, cipherDecoded, false);
@@ -1116,9 +1098,7 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 			){
 		
 		
-		boolean result = false;
 		System.out.println("temp cipher: " + cipher);
-		//System.out.println("temp envelope: " + envelope);
 		System.out.println("temp digitalsignature: " + digitalSignature);
 		
 		System.out.println("temp opModeSymmetric: " + opModeSymmetric);
