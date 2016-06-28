@@ -1057,11 +1057,12 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 		
 	}
 	
+	
 	public static synchronized boolean verifyDigitalSignature(String cipher, String envelope, String digitalSignature, PublicKey publicKey, String opModeAsymmetric, KeyPair privateKeyPair){
 		boolean result = false;
-		System.out.println("temp cipher: " + cipher);
-		System.out.println("temp envelope: " + envelope);
-		System.out.println("temp digitalsignature: " + digitalSignature);
+//		System.out.println("temp cipher: " + cipher);
+//		System.out.println("temp envelope: " + envelope);
+//		System.out.println("temp digitalsignature: " + digitalSignature);
 		
 		try {
 
@@ -1076,9 +1077,9 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 			byte[] symmetricKey = Base64.getDecoder().decode(jsonEnvoelope.getString(MessageType.KEY).getBytes(StandardCharsets.UTF_8));
 			String hashFunction = jsonEnvoelope.getString(MessageType.HASH);
 			
-			System.out.println("temp opModeSymmetric: " + opModeSymmetric);
-			System.out.println("temp symmetricKey: " + symmetricKey);
-			System.out.println("temp hashFunction: " + hashFunction);
+//			System.out.println("temp opModeSymmetric: " + opModeSymmetric);
+//			System.out.println("temp symmetricKey: " + symmetricKey);
+//			System.out.println("temp hashFunction: " + hashFunction);
 			
 			byte[] cipherDecoded = Base64.getDecoder().decode(cipher.getBytes(StandardCharsets.UTF_8));
 			byte[] cipherDecrypted = symmetricEncryptDecrypt(opModeSymmetric, symmetricKey, cipherDecoded, false);
@@ -1091,7 +1092,7 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 			byte[] digitalSignatureDecrypted = asymmetricEncryptDecrypt(opModeAsymmetric, publicKey, digitalSignatureDecoded, false);
 			System.out.println("temp digitalSignatureDecrypted: " + new String(digitalSignatureDecrypted, StandardCharsets.UTF_8));
 			
-			return Arrays.areEqual(cipherDecryptedDigest, digitalSignatureDecrypted);
+			result = Arrays.areEqual(cipherDecryptedDigest, digitalSignatureDecrypted);
 			
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
@@ -1102,4 +1103,40 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 		return result;
 	}
 	
+	
+	public static synchronized boolean verifyDigitalSignature(
+			String cipher, 
+			String digitalSignature, 
+			PublicKey publicKey, 
+			String opModeAsymmetric, 
+			KeyPair privateKeyPair,
+			String opModeSymmetric,
+			byte[] symmetricKey,
+			String hashFunction 
+			){
+		
+		
+		boolean result = false;
+		System.out.println("temp cipher: " + cipher);
+		//System.out.println("temp envelope: " + envelope);
+		System.out.println("temp digitalsignature: " + digitalSignature);
+		
+		System.out.println("temp opModeSymmetric: " + opModeSymmetric);
+		System.out.println("temp symmetricKey: " + symmetricKey);
+		System.out.println("temp hashFunction: " + hashFunction);
+		
+		byte[] cipherDecoded = Base64.getDecoder().decode(cipher.getBytes(StandardCharsets.UTF_8));
+		byte[] cipherDecrypted = symmetricEncryptDecrypt(opModeSymmetric, symmetricKey, cipherDecoded, false);
+		byte[] cipherDecryptedDecoded = Base64.getDecoder().decode(cipherDecrypted);
+		
+		byte[] cipherDecryptedDigest = hash(hashFunction, cipherDecryptedDecoded);
+		System.out.println("temp cipherDecryptedDigest: " + new String(cipherDecryptedDigest, StandardCharsets.UTF_8));
+		
+		byte[] digitalSignatureDecoded = Base64.getDecoder().decode(digitalSignature.getBytes(StandardCharsets.UTF_8));
+		byte[] digitalSignatureDecrypted = asymmetricEncryptDecrypt(opModeAsymmetric, publicKey, digitalSignatureDecoded, false);
+		System.out.println("temp digitalSignatureDecrypted: " + new String(digitalSignatureDecrypted, StandardCharsets.UTF_8));
+		
+		return Arrays.areEqual(cipherDecryptedDigest, digitalSignatureDecrypted);
+		
+	}
 }
