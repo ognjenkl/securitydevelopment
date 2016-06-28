@@ -749,7 +749,9 @@ public class CryptoImpl {
 	 * @param keyPath
 	 * @return
 	 * @throws IOException
+	 * @deprecated use {@link #getKeyPair(File)} instead.
 	 */
+	@Deprecated
 	public static KeyPair getKeyPair(String keyPath) throws IOException{
 		File filePrivateKey = new File(keyPath);
 		KeyPair keyPair = null;
@@ -766,8 +768,10 @@ public class CryptoImpl {
 		return keyPair;
 	}
 	
+	
+	
 	/**
-	 * Imports Key.
+	 * Imports Private Key from File.
 	 * 
 	 * @param keyPath
 	 * @return
