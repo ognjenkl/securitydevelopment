@@ -945,6 +945,7 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 	
 	/**
 	 * Imports private key with password protection.
+	 * Testirati za DER da li radi.
 	 * 
 	 * @param keyPath
 	 * @return
@@ -993,6 +994,7 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 	
 	/**
 	 * Imports public key with password protection.
+	 * Testirati za DER da li radi.
 	 * 
 	 * @param keyPath
 	 * @return
@@ -1059,7 +1061,6 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 			byte[] envelopeDecoded = Base64.getDecoder().decode(envelope.getBytes(StandardCharsets.UTF_8));
 			byte[] envelopeDecrypted = asymmetricEncryptDecrypt(opModeAsymmetric, privateKeyPair.getPrivate(), envelopeDecoded, false);
 			String envelopeDecryptedString = new String(Base64.getDecoder().decode(envelopeDecrypted), StandardCharsets.UTF_8);
-			System.out.println("temp envelope decrypted: " + envelopeDecryptedString);
 			
 		
 			JSONObject jsonEnvoelope = new JSONObject(envelopeDecryptedString);
@@ -1072,11 +1073,9 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 			byte[] cipherDecryptedDecoded = Base64.getDecoder().decode(cipherDecrypted);
 			
 			byte[] cipherDecryptedDigest = hash(hashFunction, cipherDecryptedDecoded);
-			System.out.println("temp cipherDecryptedDigest: " + new String(cipherDecryptedDigest, StandardCharsets.UTF_8));
 			
 			byte[] digitalSignatureDecoded = Base64.getDecoder().decode(digitalSignature.getBytes(StandardCharsets.UTF_8));
 			byte[] digitalSignatureDecrypted = asymmetricEncryptDecrypt(opModeAsymmetric, publicKey, digitalSignatureDecoded, false);
-			System.out.println("temp digitalSignatureDecrypted: " + new String(digitalSignatureDecrypted, StandardCharsets.UTF_8));
 			
 			result = Arrays.areEqual(cipherDecryptedDigest, digitalSignatureDecrypted);
 			
@@ -1090,7 +1089,7 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 	}
 	
 	
-	public static synchronized boolean verifyDigitalSignature(
+	public static boolean verifyDigitalSignature(
 			String cipher, 
 			String digitalSignature, 
 			PublicKey publicKey, 
@@ -1100,14 +1099,6 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 			byte[] symmetricKey,
 			String hashFunction 
 			){
-		
-		
-		System.out.println("temp cipher: " + cipher);
-		System.out.println("temp digitalsignature: " + digitalSignature);
-		
-		System.out.println("temp opModeSymmetric: " + opModeSymmetric);
-		System.out.println("temp symmetricKey: " + symmetricKey);
-		System.out.println("temp hashFunction: " + hashFunction);
 		
 		byte[] cipherDecoded = Base64.getDecoder().decode(cipher.getBytes(StandardCharsets.UTF_8));
 		byte[] cipherDecrypted = symmetricEncryptDecrypt(opModeSymmetric, symmetricKey, cipherDecoded, false);
