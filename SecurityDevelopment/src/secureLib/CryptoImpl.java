@@ -1114,4 +1114,31 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 		return Arrays.areEqual(cipherDecryptedDigest, digitalSignatureDecrypted);
 		
 	}
+	
+	public static boolean verifyDigitalSignatureAgainstPlainText(
+			String textString, 
+			String digitalSignature, 
+			PublicKey publicKey, 
+			String opModeAsymmetric, 
+			KeyPair privateKeyPair,
+			String opModeSymmetric,
+			byte[] symmetricKey,
+			String hashFunction 
+			){
+		
+		
+		byte[] textDecoded = textString.getBytes(StandardCharsets.UTF_8);
+		
+		byte[] textDigest = hash(hashFunction, textDecoded);
+		System.out.println("temp cipherDecryptedDigest: " + new String(textDigest, StandardCharsets.UTF_8));
+		
+		byte[] digitalSignatureDecoded = Base64.getDecoder().decode(digitalSignature.getBytes(StandardCharsets.UTF_8));
+		byte[] digitalSignatureDecrypted = asymmetricEncryptDecrypt(opModeAsymmetric, publicKey, digitalSignatureDecoded, false);
+		System.out.println("temp digitalSignatureDecrypted: " + new String(digitalSignatureDecrypted, StandardCharsets.UTF_8));
+		
+		return Arrays.areEqual(textDigest, digitalSignatureDecrypted);
+		
+	}
+	
+	
 }
