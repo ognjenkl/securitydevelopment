@@ -4,11 +4,8 @@ public class MessageType {
 
 	public static final String CHAT = "chat";
 	public static final String CHATKEY = "chatkey";
-	public static final String CHATKEYOK = "chatkeyok";
 	public static final String LOGIN = "login";
-	public static final String LOGOUT = "logout";
 	public static final String UPDATE = "update";
-	public static final String LOGINOK = "loginok";
 	public static final String SERVER = "server";
 	public static final String PUBLICKEY = "publickey";
 	public static final String OK = "ok";

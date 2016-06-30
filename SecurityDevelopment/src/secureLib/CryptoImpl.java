@@ -734,9 +734,8 @@ public class CryptoImpl {
 		}
 		else{
 			//PBEWithSHAAnd128BitRC4"
-				output = rc4Cipher(algorithm, keyChar.toCharArray(), input, encDecMode, salt, iterationCount);
-			//return output;
-
+			output = rc4Cipher(algorithm, keyChar.toCharArray(), input, encDecMode, salt, iterationCount);
+			
 		}
 
 		return output;
@@ -806,9 +805,7 @@ public class CryptoImpl {
 		if(filePrivateKey.exists()){
 			BufferedReader bufferedReader = new BufferedReader(new FileReader(filePrivateKey));
 			PEMParser pemParser = new PEMParser(bufferedReader);
-			//PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
 			SubjectPublicKeyInfo pubInfo = SubjectPublicKeyInfo.getInstance(pemParser.readObject());
-			//keyPair = new JcaPEMKeyConverter().getKeyPair(pemKeyPair);
 			pubKey = new JcaPEMKeyConverter().getPublicKey(pubInfo);
 			pemParser.close();
 		}
@@ -830,9 +827,7 @@ public class CryptoImpl {
 		if(filePublicKey.exists()){
 			BufferedReader bufferedReader = new BufferedReader(new FileReader(filePublicKey));
 			PEMParser pemParser = new PEMParser(bufferedReader);
-			//PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
 			SubjectPublicKeyInfo pubInfo = SubjectPublicKeyInfo.getInstance(pemParser.readObject());
-			//keyPair = new JcaPEMKeyConverter().getKeyPair(pemKeyPair);
 			pubKey = new JcaPEMKeyConverter().getPublicKey(pubInfo);
 			pemParser.close();
 		}
@@ -857,9 +852,7 @@ public class CryptoImpl {
 		if(filePublicKey.exists()){
 			BufferedReader bufferedReader = new BufferedReader(new FileReader(filePublicKey));
 			PEMParser pemParser = new PEMParser(bufferedReader);
-			//PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
 			SubjectPublicKeyInfo pubInfo = SubjectPublicKeyInfo.getInstance(pemParser.readObject());
-			//keyPair = new JcaPEMKeyConverter().getKeyPair(pemKeyPair);
 			pubKey = new JcaPEMKeyConverter().getPublicKey(pubInfo);
 			pemParser.close();
 			
@@ -926,7 +919,6 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 		if(filePrivateKey.exists()){
 			BufferedReader bufferedReader = new BufferedReader(new FileReader(filePrivateKey));
 			PEMParser pemParser = new PEMParser(bufferedReader);
-			//PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
 			Object keyPairObj = pemParser.readObject();
 			
 			JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
@@ -976,20 +968,10 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 		
 		
 		System.out.println("pwd: " + System.getProperty("user.dir") + keyPath);
-//		KeyPair keyPair = null;
-//		if(filePrivateKey.exists()){
-//			BufferedReader bufferedReader = new BufferedReader(new FileReader(filePrivateKey));
-//			PEMParser pemParser = new PEMParser(bufferedReader);
-//			PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
-//			keyPair = new JcaPEMKeyConverter().getKeyPair(pemKeyPair);
-//			pemParser.close();
-//		}
-//		else
-//			System.out.println("There is no Key on path: " + keyPath );
 		
 		PrivateKey privKey = keyFac.generatePrivate(pkcs8KeySpec);
 		return privKey;
-//		return keyPair;
+
 	}
 	
 	/**
@@ -1052,7 +1034,17 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 		
 	}
 	
-	
+	/**
+	 * Verify digital signature against cipher text. Asymmetric data in envelope.
+	 * 
+	 * @param cipher text to be verified
+	 * @param envelope contains algorithms and hast function data 
+	 * @param digitalSignature
+	 * @param publicKey
+	 * @param opModeAsymmetric
+	 * @param privateKeyPair
+	 * @return
+	 */
 	public static synchronized boolean verifyDigitalSignature(String cipher, String envelope, String digitalSignature, PublicKey publicKey, String opModeAsymmetric, KeyPair privateKeyPair){
 		boolean result = false;
 		
@@ -1089,6 +1081,19 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 	}
 	
 	
+	/**
+	 * Verify digital signature cipher text.
+	 * 
+	 * @param cipher text to be verified with digital signature
+	 * @param digitalSignature
+	 * @param publicKey of signer
+	 * @param opModeAsymmetric asymmetric algorithm data
+	 * @param privateKeyPair
+	 * @param opModeSymmetric
+	 * @param symmetricKey
+	 * @param hashFunction
+	 * @return
+	 */
 	public static boolean verifyDigitalSignature(
 			String cipher, 
 			String digitalSignature, 
@@ -1105,16 +1110,27 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 		byte[] cipherDecryptedDecoded = Base64.getDecoder().decode(cipherDecrypted);
 		
 		byte[] cipherDecryptedDigest = hash(hashFunction, cipherDecryptedDecoded);
-		System.out.println("temp cipherDecryptedDigest: " + new String(cipherDecryptedDigest, StandardCharsets.UTF_8));
 		
 		byte[] digitalSignatureDecoded = Base64.getDecoder().decode(digitalSignature.getBytes(StandardCharsets.UTF_8));
 		byte[] digitalSignatureDecrypted = asymmetricEncryptDecrypt(opModeAsymmetric, publicKey, digitalSignatureDecoded, false);
-		System.out.println("temp digitalSignatureDecrypted: " + new String(digitalSignatureDecrypted, StandardCharsets.UTF_8));
 		
 		return Arrays.areEqual(cipherDecryptedDigest, digitalSignatureDecrypted);
 		
 	}
 	
+	/**
+	 * Verify digital signature against digital signed text.
+	 * 
+	 * @param textString digital signed text.
+	 * @param digitalSignature
+	 * @param publicKey of signer
+	 * @param opModeAsymmetric asymmetric algorithm data
+	 * @param privateKeyPair 
+	 * @param opModeSymmetric
+	 * @param symmetricKey
+	 * @param hashFunction 
+	 * @return
+	 */
 	public static boolean verifyDigitalSignatureAgainstPlainText(
 			String textString, 
 			String digitalSignature, 
@@ -1130,11 +1146,9 @@ public static PublicKey deserializeRsaPublicKey(byte[] key){
 		byte[] textDecoded = textString.getBytes(StandardCharsets.UTF_8);
 		
 		byte[] textDigest = hash(hashFunction, textDecoded);
-		System.out.println("temp cipherDecryptedDigest: " + new String(textDigest, StandardCharsets.UTF_8));
 		
 		byte[] digitalSignatureDecoded = Base64.getDecoder().decode(digitalSignature.getBytes(StandardCharsets.UTF_8));
 		byte[] digitalSignatureDecrypted = asymmetricEncryptDecrypt(opModeAsymmetric, publicKey, digitalSignatureDecoded, false);
-		System.out.println("temp digitalSignatureDecrypted: " + new String(digitalSignatureDecrypted, StandardCharsets.UTF_8));
 		
 		return Arrays.areEqual(textDigest, digitalSignatureDecrypted);
 		
